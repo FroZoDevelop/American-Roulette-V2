@@ -23,7 +23,7 @@ stmt.finalize();*/
 // -- tp: success/error
 // -- message: сообщение
 function getResponse( tp, message ){
-  return { "type" : tp, "message" : message };
+  return { "event" : tp, "message" : message };
 }
 
 // Точка входа
@@ -31,10 +31,12 @@ function initialization(){
   // Подключаем преобразование данных в JSON
   // Подключаемся к провайдеру ethereum в локальной сети
   server.use( bodyToJson.json() );
-  server.use( bodyToJson.urlencoded({
-      extended: true
-  }))
+  server.use( bodyToJson.urlencoded( {
+    extended : true
+  } ) );
+  
   web3.setProvider( new web3.providers.HttpProvider( "http://localhost:8545" ) );
+  
   server.use(function (req, res, next) {
     var origins = [
         'http://localhost:3000',
