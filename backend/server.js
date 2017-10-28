@@ -39,7 +39,7 @@ function initialization(){
   
   server.use(function (req, res, next) {
     var origins = [
-        'http://localhost:3000',
+        'http://localhost:3000'
     ];
 
     for(var i = 0; i < origins.length; i++){
@@ -67,6 +67,8 @@ function initialization(){
         // Получить баланс пользователя в сети ethereum
         // через хэш аккаунта
         case "get balance":
+          console.log( req.body );
+          
           try{
             response = getResponse( "success", web3.eth.getBalance( req.body[ "account" ] ).c[0] );
           } catch( err ){ response = getResponse( "error", "Invalid account address" ); };
