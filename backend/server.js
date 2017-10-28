@@ -4,20 +4,14 @@
 // -- body-parser для преобразования данных в JSON
 var express = require( "express" );
 var Web3 = require( "web3" );
-// var sqlite3 = require( "sqlite3" );
 var bodyToJson = require( "body-parser" );
 
 // Создаём объекты express и web3
 var server = express();
 var web3 = new Web3();
-/*var database = new sqlite3.Database( "database.db" );
 
-database.exec( "create table users( login )" );
-stmt = database.prepare( "insert into users( login ) values( ? )" );
-stmt.run( "FroZo" );
-stmt.finalize();*/
-
-
+var contract = require( "./contract.js" );
+var TrashCoin = web3.eth.contract( contract.ABI ).at( contract.address );
 
 // Формирование ответа сервера
 // -- tp: success/error
@@ -38,7 +32,7 @@ function initialization(){
   web3.setProvider( new web3.providers.HttpProvider( "http://localhost:8545" ) );
   
   server.use(function (req, res, next) {
-    var origins = [
+    /*var origins = [
         'http://localhost:3000'
     ];
 
@@ -48,15 +42,19 @@ function initialization(){
         if(req.headers.origin.indexOf(origin) > -1){
             res.header('Access-Control-Allow-Origin', req.headers.origin);
         }
-    }
+    }*/
     
+    res.header('Access-Control-Allow-Origin', req.headers.origin);
     res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
-});
+  } );
+  
   // Обработчик POST запроса
   server.post( "/", function( req, res, next ){
-    var response;
+    var fl, response;
+    
+    fl = true;
     
     // Проверяем, есть ли "event" в данных
     try{
@@ -70,8 +68,14 @@ function initialization(){
           console.log( req.body );
           
           try{
-            response = getResponse( "success", web3.eth.getBalance( req.body[ "account" ] ).c[0] );
-          } catch( err ){ response = getResponse( "error", "Invalid account address" ); };
+            web3.eth.getBalance( req.body[ "account" ] ).c[0];
+            
+            try{
+              web3.personal.unlockAccount( req.body[ "account" ], req.body[ "password" ], 1000 );
+              // response = getResponse( "success", TrashCoin.tokenName );
+              response = getResponse( "Ты", "Приёмный" );
+            } catch( err ) { response = getResponse( "error", "Invalid account password" ); }
+          } catch( err ){ response = getResponse( "error", "Invalid account address" ); }
         break;
         
         // Если в "event" не содержится ничего, что можно обработать
