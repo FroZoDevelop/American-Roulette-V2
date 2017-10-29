@@ -52,30 +52,52 @@ function initialization(){
   
   // Обработчик POST запроса
   server.post( "/", function( req, res, next ){
-    var fl, response;
-    
-    fl = true;
+    var response;
     
     // Проверяем, есть ли "event" в данных
     try{
       evnt = req.body[ "event" ];
+      
+      console.log( req.body );
       
       // На разный "event" разный ответ
       switch( evnt ){
         // Получить баланс пользователя в сети ethereum
         // через хэш аккаунта
         case "get balance":
-          console.log( req.body );
-          
           try{
             web3.eth.getBalance( req.body[ "account" ] ).c[0];
             
             try{
               web3.personal.unlockAccount( req.body[ "account" ], req.body[ "password" ], 1000 );
-              // response = getResponse( "success", TrashCoin.tokenName );
-              response = getResponse( "Ты", "Приёмный" );
+              response = getResponse( "success", TrashCoin.balanceOf( req.body[ "account" ] ).c[0] );
             } catch( err ) { response = getResponse( "error", "Invalid account password" ); }
           } catch( err ){ response = getResponse( "error", "Invalid account address" ); }
+        break;
+        
+        case "buy tickets":
+          var eth = req.body[ "ethereum" ];
+          
+          if( typeof( eth ) == "string" ){
+            if( eth.indexOf( "." ) != -1 ) eth = parseFloat( eth );
+            else eth = parseInt( eth );
+          }
+          
+          eth *= Math.pow( 10, 18 );
+          
+          web3.personal.unlockAccount( req.body[ "account" ], req.body[ "password" ], 1000 );
+          response = getResponse( "success", TrashCoin.buy.sendTransaction( { from : req.body[ "account" ], value : eth } ) );
+        break;
+        
+        case "sell tickets":
+          var tickets;
+          
+          tickets = req.body[ "tickets" ];
+          
+          if( typeof( tickets ) == "string" ) tickets = parseInt( tickets );
+          
+          web3.personal.unlockAccount( req.body[ "account" ], req.body[ "password" ], 1000 );
+          response = getResponse( "success", TrashCoin.sell.sendTransaction( tickets, { from : req.body[ "account" ] } ) );
         break;
         
         // Если в "event" не содержится ничего, что можно обработать

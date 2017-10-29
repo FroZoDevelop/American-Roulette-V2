@@ -198,7 +198,7 @@ contract TrashCoin is owned, TokenERC20{
     msg.sender.transfer( val2 );
   }
   
-  function getHUY() public{
-    
+  function getRandomInt( min, max ) {
+    return Math.floor( Math.random() * ( max - min + 1 ) ) + min;
   }
 }
